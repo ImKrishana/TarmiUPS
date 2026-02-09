@@ -470,27 +470,30 @@ async def send_log_message(message, link, tag):
                 )
         msg = ""
         if isSuperGroup and not config_dict["DELETE_LINKS"]:
-            msg+=f"\n\n<b><a href='{message.link}'>Source Link</a></b>: "
-        msg += f"<code>{link}</code>\n\n<b>Added by</b>: {tag}\n"
-        msg += f"<b>User ID</b>: <code>{message.from_user.id}</code>"
+            msg += f"Source: {message.link}\n\n"
+
+        msg += (
+            f"{link}\n\n"
+            f"Added by: {tag}\n"
+            f"User ID: {message.from_user.id}"
+        )
+
         return await message._client.send_message(
             log_chat,
             msg,
             disable_web_page_preview=True
         )
+
     except FloodWait as r:
         LOGGER.warning(str(r))
-        await sleep(r.value * 1.2) # type: ignore
-        return await send_log_message(
-            message,
-            link,
-            tag
-        )
+        await sleep(r.value * 1.2)  # type: ignore
+        return await send_log_message(message, link, tag)
+
     except RPCError as e:
         LOGGER.error(f"{e.NAME}: {e.MESSAGE}")
+
     except Exception as e:
         LOGGER.error(str(e))
-
 
 async def is_admin(message, user_id=None):
     if message.chat.type == message.chat.type.PRIVATE:
